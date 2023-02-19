@@ -1,2 +1,0 @@
-# sahar
-mandelbrot set
