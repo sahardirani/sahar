@@ -11,57 +11,37 @@ int B[K][N] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 int C[M][N];
 
 int num_threads = 2;
-pthread_mutex_t mutex;
 
-void *matrix_multiplication(void *arg)
-{
-    int thread_id = *(int *)arg;
+void* matrix_multiplication(void* arg) {
+    int thread_id = (int) arg;
     int start = (thread_id * M) / num_threads;
     int end = ((thread_id + 1) * M) / num_threads;
 
-    for (int i = start; i < end; i++)
-    {
-        for (int j = 0; j < N; j++)
-        {
-            int result = 0;
-            for (int k = 0; k < K; k++)
-            {
-                result += A[i][k] * B[k][j];
+    for (int i = start; i < end; i++) {
+        for (int j = 0; j < N; j++) {
+            C[i][j] = 0;
+            for (int k = 0; k < K; k++) {
+                C[i][j] += A[i][k] * B[k][j];
             }
-
-            pthread_mutex_lock(&mutex);
-            C[i][j] += result;
-            pthread_mutex_unlock(&mutex);
         }
     }
-
-    return NULL;
 }
 
-int main()
-{
+int main() {
     pthread_t threads[num_threads];
     int thread_id[num_threads];
 
-    pthread_mutex_init(&mutex, NULL);
-
-    for (int i = 0; i < num_threads; i++)
-    {
+    for (int i = 0; i < num_threads; i++) {
         thread_id[i] = i;
         pthread_create(&threads[i], NULL, matrix_multiplication, &thread_id[i]);
     }
 
-    for (int i = 0; i < num_threads; i++)
-    {
+    for (int i = 0; i < num_threads; i++) {
         pthread_join(threads[i], NULL);
     }
 
-    pthread_mutex_destroy(&mutex);
-
-    for (int i = 0; i < M; i++)
-    {
-        for (int j = 0; j < N; j++)
-        {
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < N; j++) {
             printf("%d ", C[i][j]);
         }
         printf("\n");
